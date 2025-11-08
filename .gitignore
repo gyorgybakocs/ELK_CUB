@@ -1,0 +1,4 @@
+kubectl
+minikube-linux-amd64
+.idea
+*.log

@@ -1,0 +1,119 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kibana-build
+spec:
+  backoffLimit: 0
+  completions: 1
+  parallelism: 1
+  template:
+    spec:
+      containers:
+        - name: kaniko
+          image: gcr.io/kaniko-project/executor:latest
+          workingDir: /workspace
+          env:
+            - name: KIBANA_IMAGE
+              valueFrom:
+                configMapKeyRef:
+                  name: kibana-config
+                  key: KIBANA_IMAGE
+            - name: ELK_VERSION
+              valueFrom:
+                configMapKeyRef:
+                  name: kibana-config
+                  key: ELK_VERSION
+            - name: KIBANA_P12
+              valueFrom:
+                configMapKeyRef:
+                  name: kibana-config
+                  key: KIBANA_P12
+            - name: KIBANA_CACERT
+              valueFrom:
+                configMapKeyRef:
+                  name: kibana-config
+                  key: KIBANA_CACERT
+            - name: KIBANA_CERT
+              valueFrom:
+                configMapKeyRef:
+                  name: kibana-config
+                  key: KIBANA_CERT
+            - name: KIBANA_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: kibana-config
+                  key: KIBANA_KEY
+            - name: KIBANA_ENCRYPTION_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: kibana-config
+                  key: KIBANA_ENCRYPTION_KEY
+            - name: ELASTICSEARCH_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: kibana-config
+                  key: ELASTICSEARCH_HOST
+            - name: ELASTICSEARCH_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: kibana-config
+                  key: ELASTICSEARCH_PORT
+            - name: KIBANA_SYSTEM_USER
+              valueFrom:
+                secretKeyRef:
+                  name: kibana-secret
+                  key: KIBANA_SYSTEM_USER
+            - name: KIBANA_SYSTEM_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: kibana-secret
+                  key: KIBANA_SYSTEM_PASSWORD
+            - name: KIBANA_USER
+              valueFrom:
+                secretKeyRef:
+                  name: kibana-secret
+                  key: KIBANA_USER
+            - name: KIBANA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: kibana-secret
+                  key: KIBANA_PASSWORD
+            - name: ELASTICSEARCH_USER
+              valueFrom:
+                secretKeyRef:
+                  name: kibana-secret
+                  key: ELASTICSEARCH_USER
+            - name: ELASTICSEARCH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: kibana-secret
+                  key: ELASTICSEARCH_PASSWORD
+          args:
+            - "--dockerfile=docker/kibana/Dockerfile"
+            - "--context=/workspace"
+            - "--destination=registry.default.svc.cluster.local:5000/elk/kibana-elk:built"
+            - "--build-arg=ELK_VERSION=$(ELK_VERSION)"
+            - "--build-arg=KIBANA_P12=$(KIBANA_P12)"
+            - "--build-arg=KIBANA_CACERT=$(KIBANA_CACERT)"
+            - "--build-arg=KIBANA_CERT=$(KIBANA_CERT)"
+            - "--build-arg=KIBANA_KEY=$(KIBANA_KEY)"
+            - "--build-arg=KIBANA_ENCRYPTION_KEY=$(KIBANA_ENCRYPTION_KEY)"
+            - "--build-arg=ELASTICSEARCH_HOST=$(ELASTICSEARCH_HOST)"
+            - "--build-arg=ELASTICSEARCH_PORT=$(ELASTICSEARCH_PORT)"
+            - "--build-arg=KIBANA_SYSTEM_USER=$(KIBANA_SYSTEM_USER)"
+            - "--build-arg=KIBANA_SYSTEM_PASSWORD=$(KIBANA_SYSTEM_PASSWORD)"
+            - "--build-arg=KIBANA_USER=$(KIBANA_USER)"
+            - "--build-arg=KIBANA_PASSWORD=$(KIBANA_PASSWORD)"
+            - "--build-arg=ELASTICSEARCH_USER=$(ELASTICSEARCH_USER)"
+            - "--build-arg=ELASTICSEARCH_PASSWORD=$(ELASTICSEARCH_PASSWORD)"
+            - "--insecure"
+            - "--skip-tls-verify"
+          volumeMounts:
+            - name: workspace
+              mountPath: /workspace
+      restartPolicy: Never
+      volumes:
+        - name: workspace
+          hostPath:
+            path: /workspace
+            type: Directory

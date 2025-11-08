@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: logstash
+spec:
+  selector:
+    app: logstash
+  ports:
+    - name: beats
+      protocol: TCP
+      port: 5044
+      targetPort: 5044
+    - name: custom-pipeline
+      protocol: TCP
+      port: 5959
+      targetPort: 5959
+  type: ClusterIP

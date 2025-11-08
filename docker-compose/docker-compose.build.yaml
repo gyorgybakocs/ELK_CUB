@@ -1,0 +1,44 @@
+version: '3.8'
+services:
+  elk-cub-dc-redis:
+    build:
+      context: "docker/"
+      dockerfile: "redis/dev/Dockerfile"
+    image: "${REDIS_IMAGE}"
+    container_name: "redis-build"
+    networks:
+      net_int:
+        ipv4_address: "${REDIS_INTERNAL}"
+
+  elk-cub-dc-redis-commander:
+    build:
+      context: "docker/"
+      dockerfile: "redis-commander/dev/Dockerfile"
+    image: "${REDIS_COMMANDER_IMAGE}"
+    container_name: "rediscommander-build"
+    environment:
+      REDIS_HOSTS: "local:${REDIS_HOST}:6379"
+    ports:
+      - "8082:8081"
+    depends_on:
+      - elk-cub-dc-redis
+    networks:
+      net_int:
+        ipv4_address: "${REDIS_COMMANDER_INTERNAL}"
+
+networks:
+  net_int:
+    driver: "bridge"
+    ipam:
+      config:
+        - subnet: "${INTERNAL_SUBNET}"
+  net_ext:
+    driver: "bridge"
+    ipam:
+      config:
+        - subnet: "${EXTERNAL_SUBNET}"
+        
+volumes:
+  redis-dc-data:
+    name: redis-dc-data
+    driver: "local"

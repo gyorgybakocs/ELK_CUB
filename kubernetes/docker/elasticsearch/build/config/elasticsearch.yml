@@ -1,0 +1,27 @@
+---
+discovery.type: single-node
+cluster.name: ${ELASTIC_CLUSTER_NAME}
+node.name: ${ELASTIC_NODE_NAME}
+cluster.info.update.interval: 1m
+cluster.routing.allocation.disk.threshold_enabled: false
+network.host: 0.0.0.0
+
+xpack.license.self_generated.type: basic
+
+xpack.security.enabled: true
+xpack.security.transport.ssl.enabled: true
+xpack.security.transport.ssl.keystore.path: ${ELASTIC_P12}
+xpack.security.transport.ssl.keystore.password: ${KEYSTORE_PASSWORD}
+xpack.security.http.ssl.enabled: true
+xpack.security.http.ssl.keystore.path: ${ELASTIC_P12}
+xpack.security.http.ssl.truststore.path: ${ELASTIC_TRUST_P12}
+xpack.security.http.ssl.keystore.password: ${KEYSTORE_PASSWORD}
+xpack.security.http.ssl.truststore.password: ${KEYSTORE_PASSWORD}
+xpack.security.http.ssl.verification_mode: certificate
+
+bootstrap.memory_lock: true
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+
+path.data: /usr/share/elasticsearch/data
+path.logs: /usr/share/elasticsearch/logs

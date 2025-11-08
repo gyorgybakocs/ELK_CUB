@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logstash
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: logstash
+  template:
+    metadata:
+      labels:
+        app: logstash
+    spec:
+      containers:
+      - name: logstash
+        image: ${REGISTRY_HOST}:30500/${LOGSTASH_BUILT_IMAGE}
+        envFrom:
+        - configMapRef:
+            name: logstash-config
+        - secretRef:
+            name: logstash-secret
+        env:
+        - name: LOGSTASH_IMAGE
+          valueFrom:
+            configMapKeyRef:
+              name: logstash-config
+              key: LOGSTASH_IMAGE
+        - name: LOGSTASH_BUILT_IMAGE
+          valueFrom:
+            configMapKeyRef:
+              name: logstash-config
+              key: LOGSTASH_BUILT_IMAGE
+        - name: ELK_VERSION
+          valueFrom:
+            configMapKeyRef:
+              name: logstash-config
+              key: ELK_VERSION
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: logstash-config
+              key: REDIS_HOST
+        - name: ELASTICSEARCH_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: logstash-config
+              key: ELASTICSEARCH_HOST
+        - name: DEAD_LETTER_QUEUE_ENABLE
+          valueFrom:
+            configMapKeyRef:
+              name: logstash-config
+              key: DEAD_LETTER_QUEUE_ENABLE
+        - name: DEAD_LETTER_QUEUE_FLUSH_INTERVAL
+          valueFrom:
+            configMapKeyRef:
+              name: logstash-config
+              key: DEAD_LETTER_QUEUE_FLUSH_INTERVAL
+        - name: LOGSTASH_CACERT
+          valueFrom:
+            configMapKeyRef:
+              name: logstash-config
+              key: LOGSTASH_CACERT
+        - name: LOGSTASH_P12
+          valueFrom:
+            configMapKeyRef:
+              name: logstash-config
+              key: LOGSTASH_P12
+        - name: LOGSTASH_USER
+          valueFrom:
+            secretKeyRef:
+              name: logstash-secret
+              key: LOGSTASH_USER
+        - name: LOGSTASH_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: logstash-secret
+              key: LOGSTASH_PASSWORD
+        - name: LOGSTASH_KEYSTORE_PASS
+          valueFrom:
+            secretKeyRef:
+              name: logstash-secret
+              key: LOGSTASH_KEYSTORE_PASS
+        ports:
+        - containerPort: 5044
+        - containerPort: 5959

@@ -1,0 +1,48 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: redis-build
+spec:
+  backoffLimit: 0
+  completions: 1
+  parallelism: 1
+  template:
+    spec:
+      containers:
+      - name: kaniko
+        image: gcr.io/kaniko-project/executor:latest
+        workingDir: /workspace
+        env:
+        - name: REDIS_IMAGE
+          valueFrom:
+            configMapKeyRef:
+              name: redis-config
+              key: REDIS_IMAGE
+        - name: REDIS_BUILT_IMAGE
+          valueFrom:
+            configMapKeyRef:
+              name: redis-config
+              key: REDIS_BUILT_IMAGE
+        - name: REDIS_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: redis-config
+              key: REDIS_PORT
+        - name: REGISTRY_URL
+          value: "registry.default.svc.cluster.local:5000"
+        args:
+        - "--dockerfile=docker/redis/Dockerfile"
+        - "--context=/workspace"
+        - "--destination=$(REGISTRY_URL)/$(REDIS_BUILT_IMAGE)"
+        - "--build-arg=REDIS_PORT=$(REDIS_PORT)"
+        - "--insecure"
+        - "--skip-tls-verify"
+        volumeMounts:
+        - name: workspace
+          mountPath: /workspace
+      restartPolicy: Never
+      volumes:
+      - name: workspace
+        hostPath:
+          path: /workspace
+          type: Directory

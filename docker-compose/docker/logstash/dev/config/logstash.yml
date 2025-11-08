@@ -1,0 +1,13 @@
+---
+api.http.host: 0.0.0.0
+dead_letter_queue.enable: ${DEAD_LETTER_QUEUE_ENABLE}
+dead_letter_queue.flush_interval: ${DEAD_LETTER_QUEUE_FLUSH_INTERVAL}
+path.logs: /usr/share/logstash/logs
+xpack.monitoring.enabled: true
+xpack.monitoring.elasticsearch.hosts: ["https://${ELASTICSEARCH_HOST}:9200"]
+xpack.monitoring.elasticsearch.username: ${LOGSTASH_USER}
+xpack.monitoring.elasticsearch.password: ${LOGSTASH_PASSWORD}
+xpack.monitoring.elasticsearch.ssl.certificate_authority: ${LOGSTASH_CACERT}
+xpack.monitoring.elasticsearch.ssl.verification_mode: full
+
+#log.level: debug

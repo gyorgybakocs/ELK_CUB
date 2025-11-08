@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: redis-commander-build
+spec:
+  backoffLimit: 0
+  completions: 1
+  parallelism: 1
+  template:
+    spec:
+      containers:
+      - name: kaniko
+        image: gcr.io/kaniko-project/executor:latest
+        workingDir: /workspace
+        env:
+        - name: REDIS_COMMANDER_BUILT_IMAGE
+          valueFrom:
+            configMapKeyRef:
+              name: redis-commander-config
+              key: REDIS_COMMANDER_BUILT_IMAGE
+        args:
+        - "--dockerfile=docker/redis-commander/Dockerfile"
+        - "--context=/workspace"
+        - "--destination=registry.default.svc.cluster.local:5000/$(REDIS_COMMANDER_BUILT_IMAGE)"
+        - "--insecure"
+        - "--skip-tls-verify"
+        volumeMounts:
+        - name: workspace
+          mountPath: /workspace
+      restartPolicy: Never
+      volumes:
+      - name: workspace
+        hostPath:
+          path: /workspace
+          type: Directory

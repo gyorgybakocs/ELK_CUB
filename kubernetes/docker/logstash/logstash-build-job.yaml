@@ -1,0 +1,100 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: logstash-build
+spec:
+  backoffLimit: 0
+  completions: 1
+  parallelism: 1
+  template:
+    spec:
+      containers:
+      - name: kaniko
+        image: gcr.io/kaniko-project/executor:latest
+        workingDir: /workspace
+        env:
+        - name: LOGSTASH_IMAGE
+          valueFrom:
+            configMapKeyRef:
+              name: logstash-config
+              key: LOGSTASH_IMAGE
+        - name: LOGSTASH_BUILT_IMAGE
+          valueFrom:
+            configMapKeyRef:
+              name: logstash-config
+              key: LOGSTASH_BUILT_IMAGE
+        - name: ELK_VERSION
+          valueFrom:
+            configMapKeyRef:
+              name: logstash-config
+              key: ELK_VERSION
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: logstash-config
+              key: REDIS_HOST
+        - name: ELASTICSEARCH_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: logstash-config
+              key: ELASTICSEARCH_HOST
+        - name: DEAD_LETTER_QUEUE_ENABLE
+          valueFrom:
+            configMapKeyRef:
+              name: logstash-config
+              key: DEAD_LETTER_QUEUE_ENABLE
+        - name: DEAD_LETTER_QUEUE_FLUSH_INTERVAL
+          valueFrom:
+            configMapKeyRef:
+              name: logstash-config
+              key: DEAD_LETTER_QUEUE_FLUSH_INTERVAL
+        - name: LOGSTASH_CACERT
+          valueFrom:
+            configMapKeyRef:
+              name: logstash-config
+              key: LOGSTASH_CACERT
+        - name: LOGSTASH_P12
+          valueFrom:
+            configMapKeyRef:
+              name: logstash-config
+              key: LOGSTASH_P12
+        - name: LOGSTASH_USER
+          valueFrom:
+            secretKeyRef:
+              name: logstash-secret
+              key: LOGSTASH_USER
+        - name: LOGSTASH_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: logstash-secret
+              key: LOGSTASH_PASSWORD
+        - name: LOGSTASH_KEYSTORE_PASS
+          valueFrom:
+            secretKeyRef:
+              name: logstash-secret
+              key: LOGSTASH_KEYSTORE_PASS
+        args:
+        - "--dockerfile=docker/logstash/Dockerfile"
+        - "--context=/workspace"
+        - "--destination=registry.default.svc.cluster.local:5000/$(LOGSTASH_BUILT_IMAGE)"
+        - "--build-arg=ELK_VERSION=$(ELK_VERSION)"
+        - "--build-arg=REDIS_HOST=$(REDIS_HOST)"
+        - "--build-arg=ELASTICSEARCH_HOST=$(ELASTICSEARCH_HOST)"
+        - "--build-arg=DEAD_LETTER_QUEUE_ENABLE=$(DEAD_LETTER_QUEUE_ENABLE)"
+        - "--build-arg=DEAD_LETTER_QUEUE_FLUSH_INTERVAL=$(DEAD_LETTER_QUEUE_FLUSH_INTERVAL)"
+        - "--build-arg=LOGSTASH_CACERT=$(LOGSTASH_CACERT)"
+        - "--build-arg=LOGSTASH_P12=$(LOGSTASH_P12)"
+        - "--build-arg=LOGSTASH_USER=$(LOGSTASH_USER)"
+        - "--build-arg=LOGSTASH_PASSWORD=$(LOGSTASH_PASSWORD)"
+        - "--build-arg=LOGSTASH_KEYSTORE_PASS=$(LOGSTASH_KEYSTORE_PASS)"
+        - "--insecure"
+        - "--skip-tls-verify"
+        volumeMounts:
+        - name: workspace
+          mountPath: /workspace
+      restartPolicy: Never
+      volumes:
+      - name: workspace
+        hostPath:
+          path: /workspace
+          type: Directory

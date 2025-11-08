@@ -1,0 +1,100 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: elasticsearch-build
+spec:
+  backoffLimit: 0
+  completions: 1
+  parallelism: 1
+  template:
+    spec:
+      containers:
+      - name: kaniko
+        image: gcr.io/kaniko-project/executor:latest
+        workingDir: /workspace
+        env:
+        - name: ELK_VERSION
+          valueFrom:
+            configMapKeyRef:
+              name: elasticsearch-config
+              key: ELK_VERSION
+        - name: ELASTIC_IMAGE
+          valueFrom:
+            configMapKeyRef:
+              name: elasticsearch-config
+              key: ELASTIC_IMAGE
+        - name: ELASTIC_BUILT_IMAGE
+          valueFrom:
+            configMapKeyRef:
+              name: elasticsearch-config
+              key: ELASTIC_BUILT_IMAGE
+        - name: ELASTIC_CLUSTER_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: elasticsearch-config
+              key: ELASTIC_CLUSTER_NAME
+        - name: ELASTIC_NODE_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: elasticsearch-config
+              key: ELASTIC_NODE_NAME
+        - name: ELASTIC_P12
+          valueFrom:
+            configMapKeyRef:
+              name: elasticsearch-config
+              key: ELASTIC_P12
+        - name: ELASTIC_TRUST_P12
+          valueFrom:
+            configMapKeyRef:
+              name: elasticsearch-config
+              key: ELASTIC_TRUST_P12
+        - name: KEYSTORE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: elasticsearch-secret
+              key: KEYSTORE_PASSWORD
+        - name: ELASTIC_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: elasticsearch-secret
+              key: ELASTIC_PASSWORD
+        - name: LOGSTASH_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: elasticsearch-secret
+              key: LOGSTASH_PASSWORD
+        - name: KIBANA_SYSTEM_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: elasticsearch-secret
+              key: KIBANA_SYSTEM_PASSWORD
+        - name: KIBANA_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: elasticsearch-secret
+              key: KIBANA_PASSWORD
+        args:
+        - "--dockerfile=docker/elasticsearch/Dockerfile"
+        - "--context=/workspace"
+        - "--destination=registry.default.svc.cluster.local:5000/$(ELASTIC_BUILT_IMAGE)"
+        - "--build-arg=ELK_VERSION=$(ELK_VERSION)"
+        - "--build-arg=ELASTIC_CLUSTER_NAME=$(ELASTIC_CLUSTER_NAME)"
+        - "--build-arg=ELASTIC_NODE_NAME=$(ELASTIC_NODE_NAME)"
+        - "--build-arg=ELASTIC_P12=$(ELASTIC_P12)"
+        - "--build-arg=ELASTIC_TRUST_P12=$(ELASTIC_TRUST_P12)"
+        - "--build-arg=KEYSTORE_PASSWORD=$(KEYSTORE_PASSWORD)"
+        - "--build-arg=ELASTIC_PASSWORD=$(ELASTIC_PASSWORD)"
+        - "--build-arg=LOGSTASH_PASSWORD=$(LOGSTASH_PASSWORD)"
+        - "--build-arg=KIBANA_SYSTEM_PASSWORD=$(KIBANA_SYSTEM_PASSWORD)"
+        - "--build-arg=KIBANA_PASSWORD=$(KIBANA_PASSWORD)"
+        - "--insecure"
+        - "--skip-tls-verify"
+        volumeMounts:
+        - name: workspace
+          mountPath: /workspace
+      restartPolicy: Never
+      volumes:
+      - name: workspace
+        hostPath:
+          path: /workspace
+          type: Directory

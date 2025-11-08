@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-commander-config
+data:
+  REDIS_COMMANDER_IMAGE: "elk/redis-commander-elk:latest"
+  REDIS_COMMANDER_BUILT_IMAGE: "elk/redis-commander-elk:built"
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  REDIS_URL: "redis://redis:6379"

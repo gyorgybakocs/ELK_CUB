@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elasticsearch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      containers:
+      - name: elasticsearch
+        image: ${REGISTRY_HOST}:30500/${ELASTIC_BUILT_IMAGE}
+        envFrom:
+        - configMapRef:
+            name: elasticsearch-config
+        env:
+        - name: ES_JAVA_OPTS
+          value: "-Xms2g -Xmx2g"
+        - name: ELASTIC_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: elasticsearch-secret
+              key: ELASTIC_PASSWORD
+        - name: LOGSTASH_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: elasticsearch-secret
+              key: LOGSTASH_PASSWORD
+        - name: KIBANA_SYSTEM_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: elasticsearch-secret
+              key: KIBANA_SYSTEM_PASSWORD
+        - name: KIBANA_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: elasticsearch-secret
+              key: KIBANA_PASSWORD
+        - name: KEYSTORE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: elasticsearch-secret
+              key: KEYSTORE_PASSWORD
+        - name: ELASTIC_CLUSTER_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: elasticsearch-config
+              key: ELASTIC_CLUSTER_NAME
+        - name: ELASTIC_NODE_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: elasticsearch-config
+              key: ELASTIC_NODE_NAME
+        ports:
+        - containerPort: 9200
+          name: http
+        volumeMounts:
+        - name: es-data
+          mountPath: /usr/share/elasticsearch/data
+      volumes:
+      - name: es-data
+        persistentVolumeClaim:
+          claimName: elasticsearch-pvc

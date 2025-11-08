@@ -1,0 +1,1 @@
+FROM elk/redis-commander-elk:latest

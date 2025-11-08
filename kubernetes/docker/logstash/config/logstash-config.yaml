@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logstash-config
+data:
+  ELK_VERSION: "8.15.1"
+  LOGSTASH_IMAGE: "elk/logstash-elk:8.15.1"
+  LOGSTASH_BUILT_IMAGE: "elk/logstash-elk:built"
+  LOGSTASH_HOST: "logstash"
+  LOGSTASH_PORT: "5959"
+  LOGSTASH_HEAP: "512m"
+  REDIS_HOST: "redis"
+  ELASTICSEARCH_HOST: "elasticsearch"
+  DEAD_LETTER_QUEUE_ENABLE: "true"
+  DEAD_LETTER_QUEUE_FLUSH_INTERVAL: "30"
+  LOGSTASH_CACERT: "/usr/share/logstash/config/certs/ca.crt"
+  LOGSTASH_P12: "/usr/share/logstash/config/certs/logstash.p12"

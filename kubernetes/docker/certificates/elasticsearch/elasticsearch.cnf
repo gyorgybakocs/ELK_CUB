@@ -1,0 +1,9 @@
+[req]
+req_extensions = v3_req
+[v3_req]
+subjectAltName = @alt_names
+[alt_names]
+IP.1 = 10.0.45.101
+DNS.1 = elastic-k8s
+DNS.1 = elasticsearch
+DNS.2 = localhost

@@ -1,0 +1,122 @@
+version: '3.8'
+services:
+  elk-cub-dc-elastic:
+    image: "${IMAGE_PREFIX}-elastic:${ELK_VERSION}"
+    restart: "unless-stopped"
+    container_name: "${ELASTICSEARCH_HOST}"
+    environment:
+      ELASTIC_USERNAME: "${ELASTIC_USERNAME}"
+      ELASTIC_PASSWORD: "${ELASTIC_PASSWORD}"
+      KEYSTORE_PASSWORD: "${KEYSTORE_PASSWORD}"
+      ELASTIC_CLUSTER_NAME: "${ELASTIC_CLUSTER_NAME}"
+      ELASTIC_NODE_NAME: "${ELASTIC_NODE_NAME}"
+      ES_JAVA_OPTS: "-Xmx${ELASTICSEARCH_HEAP} -Xms${ELASTICSEARCH_HEAP}"
+      ELASTIC_P12: "${ELASTIC_P12}"
+      ELASTIC_TRUST_P12: "${ELASTIC_TRUST_P12}"
+      ELASTIC_INTERNAL: "${ELASTIC_INTERNAL}"
+      LOGSTASH_PASSWORD: "${LOGSTASH_PASSWORD}"
+      KIBANA_PASSWORD: "${KIBANA_PASSWORD}"
+      KIBANA_SYSTEM_PASSWORD: "${KIBANA_SYSTEM_PASSWORD}"
+    volumes:
+      - "elasticsearch-dc-data:/usr/share/elasticsearch/data"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 200000
+        hard: 200000
+    networks:
+      net_int:
+        ipv4_address: "${ELASTIC_INTERNAL}"
+
+  elk-cub-dc-logstash:
+    image: "${IMAGE_PREFIX}-logstash:${ELK_VERSION}"
+    restart: "unless-stopped"
+    container_name: "${LOGSTASH_HOST}"
+    environment:
+      ELASTICSEARCH_HOST: "${ELASTICSEARCH_HOST}"
+      LS_JAVA_OPTS: "-Xmx${LOGSTASH_HEAP} -Xms${LOGSTASH_HEAP}"
+      DEAD_LETTER_QUEUE_ENABLE: "true"
+      DEAD_LETTER_QUEUE_FLUSH_INTERVAL: "1000"
+      LOGSTASH_CACERT: "${LOGSTASH_CACERT}"
+      LOGSTASH_P12: "${LOGSTASH_P12}"
+      LOGSTASH_KEYSTORE_PASS: "${KEYSTORE_PASSWORD}"
+      REDIS_HOST: "${REDIS_HOST}"
+      LOGSTASH_USER: "${LOGSTASH_USER}"
+      LOGSTASH_PASSWORD: "${LOGSTASH_PASSWORD}"
+    depends_on:
+      - elk-cub-dc-elastic
+    links:
+      - elk-cub-dc-redis
+    ports:
+      - "${LOGSTASH_PORT}:5959"
+    networks:
+      net_int:
+        ipv4_address: "${LOGSTASH_INTERNAL}"
+
+  elk-cub-dc-kibana:
+    image: "${IMAGE_PREFIX}-kibana:${ELK_VERSION}"
+    restart: "unless-stopped"
+    container_name: "${KIBANA_HOST}"
+    ports:
+      - "${KIBANA_PORT}:5601"
+    environment:
+      ELASTICSEARCH_HOST: "${ELASTICSEARCH_HOST}"
+      KIBANA_SYSTEM_USER: "${KIBANA_SYSTEM_USER}"
+      KIBANA_SYSTEM_PASSWORD: "${KIBANA_SYSTEM_PASSWORD}"
+      KIBANA_ENCRYPTION_KEY: "${KIBANA_ENCRYPTION_KEY}"
+      KIBANA_CACERT: "${KIBANA_CACERT}"
+      KIBANA_CERT: "${KIBANA_CERT}"
+      KIBANA_KEY: "${KIBANA_KEY}"
+    depends_on:
+      - elk-cub-dc-elastic
+    networks:
+      net_int:
+        ipv4_address: "${KIBANA_INTERNAL}"
+
+  elk-cub-dc-redis:
+    image: "${REDIS_IMAGE}"
+    container_name: "${REDIS_HOST}"
+    environment:
+      TZ: "Europe/Amsterdam"
+    ports:
+      - "${REDIS_PORT}:6379"
+    networks:
+      net_int:
+        ipv4_address: "${REDIS_INTERNAL}"
+    volumes:
+      - redis-dc-data:/data
+
+  elk-cub-dc-redis-commander:
+    image: "${REDIS_COMMANDER_IMAGE}"
+    container_name: "${REDIS_COMMANDER_HOST}"
+    restart: "always"
+    environment:
+      REDIS_HOSTS: "local:${REDIS_HOST}:6379"
+    ports:
+      - "8082:8081"
+    depends_on:
+      - elk-cub-dc-redis
+    networks:
+      net_int:
+        ipv4_address: "${REDIS_COMMANDER_INTERNAL}"
+
+networks:
+  net_int:
+    driver: "bridge"
+    ipam:
+      config:
+        - subnet: "${INTERNAL_SUBNET}"
+
+volumes:
+  redis-dc-data:
+    name: redis-dc-data
+    driver: "local"
+  elasticsearch-dc-data:
+    name: elasticsearch-dc-data
+    driver: "local"
+    

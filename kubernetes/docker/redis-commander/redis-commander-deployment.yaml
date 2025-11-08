@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-commander
+spec:
+  selector:
+    matchLabels:
+      app: redis-commander
+  template:
+    metadata:
+      labels:
+        app: redis-commander
+    spec:
+      containers:
+      - name: redis-commander
+        image: ${REGISTRY_HOST}:30500/${REDIS_COMMANDER_BUILT_IMAGE}
+        envFrom:
+        - configMapRef:
+            name: redis-commander-config
+        ports:
+        - containerPort: 8081

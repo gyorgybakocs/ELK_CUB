@@ -1,0 +1,84 @@
+services:
+  elk-cub-dc-elastic:
+    image: "bgds-dc-elastic:${ELK_VERSION}"
+    build:
+      context: "docker/"
+      dockerfile: "elasticsearch/dev/Dockerfile"
+      args:
+        ELK_VERSION: "${ELK_VERSION}"
+        ELASTIC_PASSWORD: "${ELASTIC_PASSWORD}"
+        LOGSTASH_PASSWORD: "${LOGSTASH_PASSWORD}"
+        KIBANA_SYSTEM_PASSWORD: "${KIBANA_SYSTEM_PASSWORD}"
+        KIBANA_PASSWORD: "${KIBANA_PASSWORD}"
+        ELASTIC_CLUSTER_NAME: "${ELASTIC_CLUSTER_NAME}"
+        ELASTIC_NODE_NAME: "${ELASTIC_NODE_NAME}"
+        ELASTIC_P12: "${ELASTIC_P12}"
+        ELASTIC_TRUST_P12: "${ELASTIC_TRUST_P12}"
+        KEYSTORE_PASSWORD: "${KEYSTORE_PASSWORD}"
+    container_name: "${ELASTICSEARCH_HOST}-build"
+    env_file: ".env"
+    environment:
+      ES_JAVA_OPTS: "-Xmx${ELASTICSEARCH_HEAP} -Xms${ELASTICSEARCH_HEAP}"
+    volumes:
+      - elasticsearch-dc-data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 200000
+        hard: 200000
+    networks:
+      net_int:
+        ipv4_address: "${ELASTIC_INTERNAL}"
+
+  elk-cub-dc-logstash:
+    image: "bgds-dc-logstash:${ELK_VERSION}"
+    build:
+      context: "docker/"
+      dockerfile: "logstash/dev/Dockerfile"
+      args:
+        ELK_VERSION: "${ELK_VERSION}"
+    container_name: "${LOGSTASH_HOST}-build"
+    env_file: ".env"
+    environment:
+      LS_JAVA_OPTS: "-Xmx${LOGSTASH_HEAP} -Xms${LOGSTASH_HEAP}"
+      DEAD_LETTER_QUEUE_ENABLE: "true"
+      DEAD_LETTER_QUEUE_FLUSH_INTERVAL: "1000"
+    volumes:
+      - "../docker/certificates/dev/logstash:/tmp/certificates/"
+    ports:
+      - "${LOGSTASH_PORT}:5959"
+    networks:
+      net_int:
+        ipv4_address: "${LOGSTASH_INTERNAL}"
+
+  elk-cub-dc-kibana:
+    image: "bgds-dc-kibana:${ELK_VERSION}"
+    build:
+      context: "docker/"
+      dockerfile: "kibana/dev/Dockerfile"
+      args:
+        ELK_VERSION: "${ELK_VERSION}"
+    container_name: "${KIBANA_HOST}-build"
+    ports:
+      - "${KIBANA_PORT}:5601"
+    env_file: ".env"
+    networks:
+      net_int:
+        ipv4_address: "${KIBANA_INTERNAL}"
+
+networks:
+  net_int:
+    driver: "bridge"
+    ipam:
+      config:
+        - subnet: "${INTERNAL_SUBNET}"
+
+volumes:
+  elasticsearch-dc-data:
+    name: elasticsearch-dc-data
+    driver: "local"

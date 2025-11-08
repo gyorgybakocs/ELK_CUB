@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: elasticsearch-config
+data:
+  ELK_VERSION: "8.15.1"
+  ELASTIC_CLUSTER_NAME: "k8s-cluster"
+  ELASTIC_NODE_NAME: "k8s-es"
+  ELASTIC_P12: "/usr/share/elasticsearch/config/certs/elasticsearch.p12"
+  ELASTIC_TRUST_P12: "/usr/share/elasticsearch/config/certs/elasticsearch-truststore.p12"
+  ELASTICSEARCH_HEAP: "2g"
+  ELASTIC_IMAGE: "elk/elastic-elk:8.15.1"
+  ELASTIC_BUILT_IMAGE: "elk/elastic-elk:built"
+  ELASTICSEARCH_PORT: "9200"
+  ELASTICSEARCH_HOST: "elasticsearch"
