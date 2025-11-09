@@ -5,9 +5,9 @@ metadata:
 spec:
   type: NodePort
   ports:
-  - port: 5000
-    targetPort: 5000
-    nodePort: 30500
+    - port: 5000
+      targetPort: 5000
+      nodePort: 30500
   selector:
     app: registry
 ---
@@ -26,13 +26,13 @@ spec:
         app: registry
     spec:
       containers:
-      - name: registry
-        image: registry:2
-        ports:
-        - containerPort: 5000
-        volumeMounts:
-        - name: registry-storage
-          mountPath: /var/lib/registry
+        - name: registry
+          image: registry:2
+          ports:
+            - containerPort: 5000
+          volumeMounts:
+            - name: registry-storage
+              mountPath: /var/lib/registry
       volumes:
-      - name: registry-storage
-        emptyDir: {}
+        - name: registry-storage
+          emptyDir: {}

@@ -44,17 +44,17 @@ spec:
               key: KIBANA_SYSTEM_PASSWORD
         - name: KIBANA_CERT
           valueFrom:
-            configMapRef:
+            configMapKeyRef:
               name: kibana-config
               key: KIBANA_CERT
         - name: KIBANA_ENCRYPTION_KEY
           valueFrom:
-            configMapRef:
+            configMapKeyRef:
               name: kibana-config
               key: KIBANA_ENCRYPTION_KEY
         - name: KIBANA_KEY
           valueFrom:
-            configMapRef:
+            configMapKeyRef:
               name: kibana-config
               key: KIBANA_KEY
         - name: ELASTICSEARCH_USER

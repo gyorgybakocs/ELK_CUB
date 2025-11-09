@@ -41,7 +41,7 @@ LOG_FILE="/usr/share/elasticsearch/logs/elasticsearch.log"
     "cluster": ["manage_index_templates", "monitor", "manage_ilm", "cluster:admin/xpack/monitoring/bulk"],
     "indices": [
       {
-        "names": [ "logstash-*", "bgds_dc_*" ],
+        "names": [ "logstash-*", "bgds_k8s_*" ],
         "privileges": ["write", "create_index", "auto_configure"]
       }
     ]
@@ -70,7 +70,7 @@ LOG_FILE="/usr/share/elasticsearch/logs/elasticsearch.log"
     "cluster": ["monitor", "manage_index_templates", "read_ilm", "all"],
     "indices": [
       {
-        "names": ["bgds_dc_*", "bgds_dc_default", ".kibana*"],
+        "names": ["k8s_*", "k8s_default", ".kibana*"],
         "privileges": ["read", "view_index_metadata", "monitor", "manage", "all"]
       }
     ]

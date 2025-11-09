@@ -75,7 +75,7 @@ mk-start: mk-config
 
 mk-stop:
 	@echo "----------------- Stopping Minikube -------------------"
-	minikube stop
+	-minikube stop
 
 mk-delete:
 	@echo "----------------- Deleting Minikube cluster -------------------"
@@ -84,14 +84,8 @@ mk-delete:
 mk-restart: mk-stop mk-start
 	@echo "----------------- Restarting Minikube -------------------"
 
-mk-registry:
-	@echo "----------------- Enabling Minikube registry addon -------------------"
-	minikube addons list | grep -q '^| registry *| enabled' || minikube addons enable registry
-	@echo "----------------- Checking Registry Status -------------------"
-	minikube kubectl -- get pods -n kube-system | grep registry
 
-
-mk-up: mk-start mk-registry
+mk-up: mk-start
 mk-build: mk-stop mk-delete mk-up mk-setup apply-config base_build
 
 
@@ -199,7 +193,7 @@ build-k8s-kibana:
 	kubectl logs job/kibana-build
 
 # Kubernetes Deployment
-up-k8s: down-k8s up-k8s-redis up-k8s-redis-commander up-k8s-elasticsearch up-k8s-logstash up-k8s-kibana
+up-k8s: down-k8s up-k8s-redis up-k8s-redis-commander up-k8s-elasticsearch up-k8s-logstash up-k8s-kibana forward-k8s
 	@echo "----------------- Listing running Kubernetes pods -------------------"
 	kubectl get pods
 
