@@ -171,10 +171,10 @@ config-elasticsearch:
 	ELASTIC_BUILT_IMAGE=$$(kubectl get configmap elasticsearch-config -o jsonpath='{.data.ELASTIC_BUILT_IMAGE}'); \
 	export REGISTRY_HOST ELASTIC_BUILT_IMAGE; \
 	envsubst < docker/elasticsearch/elasticsearch-config-job.yaml | kubectl apply -f -
-	kubectl wait --for=condition=complete --timeout=120s job/elasticsearch-config-job || true
+	kubectl wait --for=condition=complete --timeout=300s job/elasticsearch-config-job || true
 	@echo "----------------- Logs for Elasticsearch config job -------------------"
 	kubectl logs job/elasticsearch-config-job
-	kubectl delete job elasticsearch-config-job
+	#kubectl delete job elasticsearch-config-job
 
 build-k8s-logstash:
 	@echo "----------------- Building Logstash for Kubernetes -------------------"

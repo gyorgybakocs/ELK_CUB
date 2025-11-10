@@ -1,4 +1,4 @@
 - pipeline.id: redis
   path.config: "/etc/logstash/conf.d/logstash_redis.conf"
-#- pipeline.id: dlq
-#  path.config: "/etc/logstash/conf.d/logstash_dlq.conf"
+- pipeline.id: dlq
+  path.config: "/etc/logstash/conf.d/logstash_dlq.conf"
