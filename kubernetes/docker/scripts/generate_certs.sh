@@ -24,8 +24,8 @@ subjectAltName = @alt_names
 [alt_names]
 IP.1 = $ELASTIC_INTERNAL
 DNS.1 = $ELASTICSEARCH_HOST
-DNS.1 = elasticsearch
-DNS.2 = localhost
+DNS.2 = elasticsearch
+DNS.3 = localhost
 EOF
         openssl x509 -req -in "$output_dir/$component.csr" -CA "$CERT_DIR/common/ca.crt" -CAkey "$CERT_DIR/common/ca.key" -CAcreateserial -out "$output_dir/$component.crt" -days 365 -sha256 -extfile "$output_dir/$component.cnf" -extensions v3_req -passin pass:"$KEYSTORE_PASSWORD"
     else

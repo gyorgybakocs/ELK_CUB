@@ -57,13 +57,13 @@ spec:
             configMapKeyRef:
               name: kibana-config
               key: KIBANA_KEY
-        - name: ELASTICSEARCH_USER
+        - name: ELASTICSEARCH_USERNAME
           valueFrom:
             secretKeyRef:
               name: kibana-secret
-              key: ELASTICSEARCH_USER
+              key: KIBANA_SYSTEM_USER
         - name: ELASTICSEARCH_PASSWORD
           valueFrom:
             secretKeyRef:
               name: kibana-secret
-              key: ELASTICSEARCH_PASSWORD
+              key: KIBANA_SYSTEM_PASSWORD

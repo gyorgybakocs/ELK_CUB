@@ -102,8 +102,4 @@ LOG_FILE="/usr/share/elasticsearch/logs/elasticsearch.log"
 
   printf "\n================== Elasticsearch initialization completed ==================\n"
 
-  printf "\n====== Removing bootstrap.password from keystore to prevent re-initialization ======\n"
-  /usr/share/elasticsearch/bin/elasticsearch-keystore remove bootstrap.password
-  printf "\n====== Keystore updated ======\n"
-
 } 2>&1 | tee -a $LOG_FILE
